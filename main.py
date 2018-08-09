@@ -5,6 +5,7 @@ import helper
 import warnings
 from distutils.version import LooseVersion
 import project_tests as tests
+import time
 
 
 # Check TensorFlow Version
@@ -42,8 +43,8 @@ def load_vgg(sess, vgg_path):
     w1 = graph.get_tensor_by_name(vgg_input_tensor_name)
     keep_prob = graph.get_tensor_by_name(vgg_keep_prob_tensor_name)
     layer3 = graph.get_tensor_by_name(vgg_layer3_out_tensor_name)
-    layer4 = vgg_layer3_out_tensor_name(vgg_layer4_out_tensor_name)
-    layer7 = vgg_layer4_out_tensor_name(vgg_layer7_out_tensor_name)
+    layer4 = graph.get_tensor_by_name(vgg_layer4_out_tensor_name)
+    layer7 = graph.get_tensor_by_name(vgg_layer7_out_tensor_name)
     
     return w1, keep_prob, layer3, layer4, layer7
 tests.test_load_vgg(load_vgg, tf)
@@ -109,7 +110,7 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     labels = tf.reshape(correct_label, (-1, num_classes))
     
     # loss
-    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, labels))
+    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = logits, labels = labels))
     
     #training
     train_op = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy_loss)
@@ -138,6 +139,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     # initialize our global variables
     sess.run(tf.global_variables_initializer())
     
+    # start timer
     start_time = time.time()
     print("Training...")
     print()
@@ -161,8 +163,8 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
         avg_loss = loss_sum / len(losses)
 
         # stop timer and print training results
-        end = time.time()
-        elapsed_time = (end - start) / 60
+        end_time = time.time()
+        elapsed_time = (end_time - start_time) / 60
         elapsed_time = int(round(elapsed_time))
         print()
         print("Epoch {}".format(epoch+1), "Results:")
