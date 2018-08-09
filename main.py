@@ -103,7 +103,18 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     :return: Tuple of (logits, train_op, cross_entropy_loss)
     """
     # TODO: Implement function
-    return None, None, None
+    
+    # the output tensor is 4D so we have to reshape it to 2D
+    logits = tf.reshape(nn_last_layer, (-1, num_classes))
+    labels = tf.reshape(correct_label, (-1, num_classes))
+    
+    # loss
+    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, labels))
+    
+    #training
+    train_op = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy_loss)
+    
+    return logits, train_op, cross_entropy_loss
 tests.test_optimize(optimize)
 
 
@@ -123,7 +134,40 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param learning_rate: TF Placeholder for learning rate
     """
     # TODO: Implement function
-    pass
+    
+    # initialize our global variables
+    sess.run(tf.global_variables_initializer())
+    
+    start_time = time.time()
+    print("Training...")
+    print()
+
+    # go through all epochs
+    for epoch in range(epochs):
+        print("Epoch {}".format(epoch + 1), "/ {} ..".format(epochs))
+
+        # go through all batches
+        batch = 1
+        losses = []
+        for image, label in get_batches_fn(batch_size):
+            print("Batch {} ..".format(batch))
+            batch += 1
+            _, loss = sess.run([train_op, cross_entropy_loss],
+                               feed_dict={input_image: image, correct_label: label, keep_prob: 0.5, learning_rate: 0.0009})
+            print("Loss: = {:.3f}".format(loss))
+            losses.append(loss)
+        # calculate average loss
+        loss_sum = sum(losses)
+        avg_loss = loss_sum / len(losses)
+
+        # stop timer and print training results
+        end = time.time()
+        elapsed_time = (end - start) / 60
+        elapsed_time = int(round(elapsed_time))
+        print()
+        print("Epoch {}".format(epoch+1), "Results:")
+        print("Epoch: {}/{} | Total Time: {} mins | Avg Loss: {:.2f}".format(epoch+1, epochs, elapsed_time, avg_loss))
+        print()
 tests.test_train_nn(train_nn)
 
 
@@ -133,6 +177,9 @@ def run():
     data_dir = './data'
     runs_dir = './runs'
     tests.test_for_kitti_dataset(data_dir)
+    
+    epochs = 20 #25
+    batch_size = 2 #16
 
     # Download pretrained vgg model
     helper.maybe_download_pretrained_vgg(data_dir)
@@ -151,11 +198,19 @@ def run():
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
 
         # TODO: Build NN using load_vgg, layers, and optimize function
+        correct_label = tf.placeholder(tf.int32, [None, None, None, num_classes])
+        learning_rate = tf.placeholder(tf.float32)
+
+        input_image, keep_prob, layer3_out, layer4_out, layer7_out = load_vgg(sess, vgg_path)
+        layer_output = layers(layer3_out, layer4_out, layer7_out, num_classes)
+        logits, train_op, cross_entropy_loss = optimize(layer_output, correct_label, learning_rate, num_classes)
 
         # TODO: Train NN using the train_nn function
+        sess.run(tf.global_variables_initializer())
+        train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image, correct_label, keep_prob, learning_rate)
 
         # TODO: Save inference data using helper.save_inference_samples
-        #  helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
         # OPTIONAL: Apply the trained model to a video
 
