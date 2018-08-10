@@ -188,7 +188,7 @@ def run(video_image):
     runs_dir = './runs'
     tests.test_for_kitti_dataset(data_dir)
     
-    epochs = 20 #25
+    epochs = 2 #25
     batch_size = 2 #16
 
     # Download pretrained vgg model
