@@ -86,6 +86,11 @@ def gen_batch_function(data_folder, image_shape):
 
                 image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
                 gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
+                
+                # augment random images
+                if np.random.random() < 0.3:
+                    image = np.fliplr(image)
+                    gt_image = np.fliplr(gt_image)
 
                 gt_bg = np.all(gt_image == background_color, axis=2)
                 gt_bg = gt_bg.reshape(*gt_bg.shape, 1)
