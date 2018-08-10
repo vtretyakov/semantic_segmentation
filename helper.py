@@ -158,4 +158,4 @@ def gen_video_output(sess, image_shape, logits, keep_prob, input_image):
     street_im = scipy.misc.toimage(image)
     street_im.paste(mask, box=None, mask=mask)
                               
-    yield np.array(street_im)
+    return np.array(street_im)
