@@ -102,5 +102,6 @@ ENV/
 
 RUNS/
 
-# train and test data
+# training, test, and runs data
 data/
+runs/
