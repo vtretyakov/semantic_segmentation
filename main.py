@@ -221,8 +221,8 @@ def run(video_image):
 
         # TODO: Save inference data using helper.save_inference_samples
         #helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
-        helper.gen_video_output(sess, image_shape, logits, keep_prob, video_image)
-
+        processed_image = helper.gen_video_output(sess, image_shape, logits, keep_prob, video_image)
+        return processed_image
         # OPTIONAL: Apply the trained model to a video
 
 
