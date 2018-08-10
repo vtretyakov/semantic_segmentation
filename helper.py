@@ -91,6 +91,8 @@ def gen_batch_function(data_folder, image_shape):
                 if np.random.random() < 0.3:
                     image = np.fliplr(image)
                     gt_image = np.fliplr(gt_image)
+                else if (np.random.random() >= 0.3) and (np.random.random() < 0.6):
+                        
 
                 gt_bg = np.all(gt_image == background_color, axis=2)
                 gt_bg = gt_bg.reshape(*gt_bg.shape, 1)
@@ -143,3 +145,17 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_p
         sess, logits, keep_prob, input_image, os.path.join(data_dir, 'data_road/testing'), image_shape)
     for name, image in image_outputs:
         scipy.misc.imsave(os.path.join(output_dir, name), image)
+
+def gen_video_output(sess, image_shape, logits, keep_prob, input_image, image_shape):
+    
+    im_softmax = sess.run(
+                          [tf.nn.softmax(logits)],
+                          {keep_prob: 1.0, image_pl: [input_image]})
+        im_softmax = im_softmax[0][:, 1].reshape(image_shape[0], image_shape[1])
+        segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
+        mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
+        mask = scipy.misc.toimage(mask, mode="RGBA")
+        output_im = scipy.misc.toimage(input_image)
+        output_im.paste(mask, box=None, mask=mask)
+                              
+    yield np.array(output_im)

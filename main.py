@@ -7,7 +7,9 @@ from distutils.version import LooseVersion
 import project_tests as tests
 import time
 import numpy as np
+from moviepy.editor import VideoFileClip
 
+clip = VideoFileClip("challenge_video.mp4")
 
 # Check TensorFlow Version
 assert LooseVersion(tf.__version__) >= LooseVersion('1.0'), 'Please use TensorFlow version 1.0 or newer.  You are using {}'.format(tf.__version__)
@@ -179,7 +181,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
 tests.test_train_nn(train_nn)
 
 
-def run():
+def run(video_image):
     num_classes = 2
     image_shape = (160, 576)
     data_dir = './data'
@@ -218,10 +220,12 @@ def run():
         train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image, correct_label, keep_prob, learning_rate)
 
         # TODO: Save inference data using helper.save_inference_samples
-        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        #helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        helper.gen_video_output(sess, image_shape, logits, keep_prob, video_image, image_shape)
 
         # OPTIONAL: Apply the trained model to a video
 
 
 if __name__ == '__main__':
-    run()
+    new_clip = clip.fl_image( run )
+    new_clip.write_videofile("challenge_video_processed.mp4", audio=False)
