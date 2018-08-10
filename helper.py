@@ -146,7 +146,7 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_p
     for name, image in image_outputs:
         scipy.misc.imsave(os.path.join(output_dir, name), image)
 
-def gen_video_output(sess, image_shape, logits, keep_prob, input_image, image_shape):
+def gen_video_output(sess, image_shape, logits, keep_prob, input_image):
     
     im_softmax = sess.run(
         [tf.nn.softmax(logits)],
