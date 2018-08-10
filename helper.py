@@ -147,15 +147,15 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_p
         scipy.misc.imsave(os.path.join(output_dir, name), image)
 
 def gen_video_output(sess, image_shape, logits, keep_prob, input_image):
-    
+    image = scipy.misc.imresize(input_image, image_shape)
     im_softmax = sess.run(
         [tf.nn.softmax(logits)],
-        {keep_prob: 1.0, image_pl: [input_image]})
+        {keep_prob: 1.0, image_pl: [image]})
     im_softmax = im_softmax[0][:, 1].reshape(image_shape[0], image_shape[1])
     segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
     mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
     mask = scipy.misc.toimage(mask, mode="RGBA")
-    output_im = scipy.misc.toimage(input_image)
-    output_im.paste(mask, box=None, mask=mask)
+    street_im = scipy.misc.toimage(image)
+    street_im.paste(mask, box=None, mask=mask)
                               
-    yield np.array(output_im)
+    yield np.array(street_im)
