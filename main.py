@@ -6,6 +6,7 @@ import warnings
 from distutils.version import LooseVersion
 import project_tests as tests
 import time
+import numpy as np
 
 
 # Check TensorFlow Version
@@ -143,6 +144,9 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     start_time = time.time()
     print("Training...")
     print()
+    
+    #define a log array
+    log = []
 
     # go through all epochs
     for epoch in range(epochs):
@@ -170,6 +174,8 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
         print("Epoch {}".format(epoch+1), "Results:")
         print("Epoch: {}/{} | Total Time: {} mins | Avg Loss: {:.2f}".format(epoch+1, epochs, elapsed_time, avg_loss))
         print()
+        log.append((epoch+1, avg_loss))
+    np.savetxt('learning_log.csv', log, fmt='%.3f', delimiter=',')
 tests.test_train_nn(train_nn)
 
 
