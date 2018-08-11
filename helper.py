@@ -92,7 +92,12 @@ def gen_batch_function(data_folder, image_shape):
                 if np.random.random() < 0.3:
                     image = np.fliplr(image)
                     gt_image = np.fliplr(gt_image)
-                #else if (np.random.random() >= 0.3) and (np.random.random() < 0.6):
+                else if (np.random.random() >= 0.3) and (np.random.random() < 0.6):
+                    horiz = random.randint(-200,200)
+                    vert = random.randint(-60,60)
+                    M = np.float32([[1,0,horiz],[0,1,vert]])
+                    image = cv2.warpAffine(img,M,(cols,rows))
+                    gt_image = cv2.warpAffine(img,M,(cols,rows))
                         
 
                 gt_bg = np.all(gt_image == background_color, axis=2)
