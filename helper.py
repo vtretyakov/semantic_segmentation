@@ -180,7 +180,7 @@ def gen_video_output(sess, image_shape, logits, keep_prob, image_pl):
         street_im.paste(mask, box=None, mask=mask)
 
         # resize back to original
-        image = scipy.misc.imresize(image, orig_shape)
+        image = scipy.misc.imresize(street_im, orig_shape)
 
         # save current frame in jpg
         name = './temp_data/frame' + str(currentFrame) + '.jpg'
