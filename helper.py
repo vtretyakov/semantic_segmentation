@@ -10,6 +10,7 @@ import tensorflow as tf
 from glob import glob
 from urllib.request import urlretrieve
 from tqdm import tqdm
+import cv2
 
 
 class DLProgress(tqdm):
@@ -146,16 +147,51 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_p
     for name, image in image_outputs:
         scipy.misc.imsave(os.path.join(output_dir, name), image)
 
-def gen_video_output(sess, image_shape, logits, keep_prob, image_pl, input_image):
-    image = scipy.misc.imresize(input_image, image_shape)
-    im_softmax = sess.run(
-        [tf.nn.softmax(logits)],
-        {keep_prob: 1.0, image_pl: [image]})
-    im_softmax = im_softmax[0][:, 1].reshape(image_shape[0], image_shape[1])
-    segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
-    mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
-    mask = scipy.misc.toimage(mask, mode="RGBA")
-    street_im = scipy.misc.toimage(image)
-    street_im.paste(mask, box=None, mask=mask)
-                              
-    return np.array(street_im)
+def gen_video_output(sess, image_shape, logits, keep_prob, image_pl):
+    # playing video from file:
+    cap = cv2.VideoCapture('challenge_video.mp4')
+
+    try:
+        if not os.path.exists('temp_data'):
+            os.makedirs('temp_data')
+    except OSError:
+        print ('Error: Creating temp_data directory failed')
+    currentFrame = 0
+
+    while(True):
+        # capture frame-by-frame
+        ret, frame = cap.read()
+        
+        if not ret:
+            break
+        orig_shape = frame.shape
+        
+        # resize
+        image = scipy.misc.imresize(frame, image_shape)
+
+        im_softmax = sess.run(
+            [tf.nn.softmax(logits)],
+            {keep_prob: 1.0, image_pl: [image]})
+        im_softmax = im_softmax[0][:, 1].reshape(image_shape[0], image_shape[1])
+        segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
+        mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
+        mask = scipy.misc.toimage(mask, mode="RGBA")
+        street_im = scipy.misc.toimage(image)
+        street_im.paste(mask, box=None, mask=mask)
+
+        # resize back to original
+        image = scipy.misc.imresize(image, orig_shape)
+
+        # save current frame in jpg
+        name = './temp_data/frame' + str(currentFrame) + '.jpg'
+        print ('Writing...' + name)
+        cv2.imwrite(name, image)
+        #image = image[...,::-1] #bgr to rgb
+        #scipy.misc.imsave(name, image)
+
+        # to stop duplicate images
+        currentFrame += 1
+
+    # release the capture
+    cap.release()
+    cv2.destroyAllWindows()
