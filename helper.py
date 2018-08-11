@@ -152,8 +152,8 @@ def gen_video_output(sess, image_shape, logits, keep_prob, image_pl):
     cap = cv2.VideoCapture('challenge_video.mp4')
     ret, frame = cap.read()
     if not ret:
-    print ('Error: Obtaining first frame')
-    os._exit()
+        print ('Error: Obtaining first frame')
+        os._exit()
     orig_shape = frame.shape
     
     # prepare video writer
