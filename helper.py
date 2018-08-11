@@ -97,8 +97,10 @@ def gen_batch_function(data_folder, image_shape):
                     horiz = random.randint(-200,200)
                     vert = random.randint(-60,60)
                     M = np.float32([[1,0,horiz],[0,1,vert]])
-                    image = cv2.warpAffine(img,M,(cols,rows))
-                    gt_image = cv2.warpAffine(img,M,(cols,rows))
+                    rows, cols, _ = image.shape
+                    image = cv2.warpAffine(image,M,(cols,rows))
+                    rows, cols, _ = gt_image.shape
+                    gt_image = cv2.warpAffine(gt_image,M,(cols,rows))
                         
 
                 gt_bg = np.all(gt_image == background_color, axis=2)
