@@ -89,10 +89,11 @@ def gen_batch_function(data_folder, image_shape):
                 gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
                 
                 # augment random images
-                if np.random.random() < 0.3:
+                rand_var = np.random.random()
+                if rand_var < 0.3:
                     image = np.fliplr(image)
                     gt_image = np.fliplr(gt_image)
-                else if (np.random.random() >= 0.3) and (np.random.random() < 0.6):
+                else if (rand_var >= 0.3) and (rand_var < 0.6):
                     horiz = random.randint(-200,200)
                     vert = random.randint(-60,60)
                     M = np.float32([[1,0,horiz],[0,1,vert]])
