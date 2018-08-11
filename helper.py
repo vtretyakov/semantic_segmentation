@@ -93,7 +93,7 @@ def gen_batch_function(data_folder, image_shape):
                 if rand_var < 0.3:
                     image = np.fliplr(image)
                     gt_image = np.fliplr(gt_image)
-                else if (rand_var >= 0.3) and (rand_var < 0.6):
+                elif (rand_var >= 0.3) and (rand_var < 0.6):
                     horiz = random.randint(-200,200)
                     vert = random.randint(-60,60)
                     M = np.float32([[1,0,horiz],[0,1,vert]])
