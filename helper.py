@@ -11,7 +11,7 @@ from glob import glob
 from urllib.request import urlretrieve
 from tqdm import tqdm
 import cv2
-
+from moviepy.editor import ImageSequenceClip
 
 class DLProgress(tqdm):
     last_block = 0
@@ -150,6 +150,15 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_p
 def gen_video_output(sess, image_shape, logits, keep_prob, image_pl):
     # playing video from file:
     cap = cv2.VideoCapture('challenge_video.mp4')
+    ret, frame = cap.read()
+    if not ret:
+    print ('Error: Obtaining first frame')
+    os._exit()
+    orig_shape = frame.shape
+    
+    # prepare video writer
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video = cv2.VideoWriter('challenge_video_processed.mp4', fourcc, 30, (orig_shape[1],orig_shape[0]))
 
     try:
         if not os.path.exists('temp_data'):
@@ -164,7 +173,6 @@ def gen_video_output(sess, image_shape, logits, keep_prob, image_pl):
         
         if not ret:
             break
-        orig_shape = frame.shape
         
         # resize
         image = scipy.misc.imresize(frame, image_shape)
@@ -188,6 +196,9 @@ def gen_video_output(sess, image_shape, logits, keep_prob, image_pl):
         cv2.imwrite(name, image)
         #image = image[...,::-1] #bgr to rgb
         #scipy.misc.imsave(name, image)
+
+        # write frame by frame into video
+        video.write(image)
 
         # to stop duplicate images
         currentFrame += 1
