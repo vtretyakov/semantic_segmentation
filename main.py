@@ -159,7 +159,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
             print("Epoch {}".format(epoch + 1), "/ {} ".format(epochs), "Batch {} ..".format(batch))
             batch += 1
             _, loss = sess.run([train_op, cross_entropy_loss],
-                               feed_dict={input_image: image, correct_label: label, keep_prob: 0.5, learning_rate: 0.0001})
+                               feed_dict={input_image: image, correct_label: label, keep_prob: 0.75, learning_rate: 0.0001})
             print("Loss: = {:.3f}".format(loss))
             losses.append(loss)
         # calculate average loss
@@ -186,8 +186,8 @@ def run():
     runs_dir = './runs'
     tests.test_for_kitti_dataset(data_dir)
     
-    epochs = 20 #25
-    batch_size = 1 #16
+    epochs = 20
+    batch_size = 2 
 
     # Download pretrained vgg model
     helper.maybe_download_pretrained_vgg(data_dir)
